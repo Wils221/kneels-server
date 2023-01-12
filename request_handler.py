@@ -1,5 +1,9 @@
 import json
 from views import get_all_metals
+from views import get_all_styles
+from views import get_all_sizes
+from views import get_all_orders
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -14,8 +18,21 @@ class HandleRequests(BaseHTTPRequestHandler):
         if self.path == "/metals":
             response = get_all_metals()
 
-        else:
-            response = []
+
+
+        elif self.path == "/styles":
+            response = get_all_styles()
+
+
+
+        elif self.path == "/sizes":
+            response = get_all_sizes()
+
+
+
+        elif self.path == "/orders":
+            response = get_all_orders()
+
 
         self.wfile.write(json.dumps(response).encode())
 
@@ -25,7 +42,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
-        response = { "payload" : post_body }
+        response = {"payload": post_body}
         self.wfile.write(json.dumps(response).encode())
 
     def do_PUT(self):
@@ -49,10 +66,11 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-        self.send_header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept')
+        self.send_header('Access-Control-Allow-Methods',
+                         'GET, POST, PUT, DELETE')
+        self.send_header('Access-Control-Allow-Headers',
+                         'X-Requested-With, Content-Type, Accept')
         self.end_headers()
-
 
 
 # point of this application.
