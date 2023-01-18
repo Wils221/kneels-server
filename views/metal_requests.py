@@ -29,3 +29,25 @@ METALS = [
 
 def get_all_metals():
     return METALS
+
+def get_single_metal(id):
+    # Variable to hold the found animal, if it exists
+    requested_metal = None
+
+    # Iterate the ANIMALS list above. Very similar to the
+    # for..of loops you used in JavaScript.
+    for metal in METALS:
+        # Dictionaries in Python use [] notation to find a key
+        # instead of the dot notation that JavaScript used.
+        if metal["id"] == id:
+            requested_metal = metal
+
+    return requested_metal
+
+def create_metal(metal):
+    max_id = METALS[-1]["id"]
+    new_id = max_id + 1
+    metal["id"] = new_id
+    METALS.append(metal)
+
+    return metal
