@@ -1,44 +1,139 @@
+import json
+import sqlite3
+from models import Order, Metal, Size, Style
+
+
+
 ORDERS = [
     {
         "id": 1,
         "metalId": 3,
         "sizeId": 2,
         "styleId": 3,
-        "timestamp": 1614659931693,
+        "timestamp": 1614659931693
     }
 ]
 
 
 def get_all_orders():
-    return ORDERS
+    """Returns all order dictionaries"""
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        SELECT
+            o.id,
+            o.metal_id,
+            o.style_id,
+            o.size_id,
+            m.metal,
+            m.price metal_price,
+            s.style,
+            s.price style_price,
+            sz.carets,
+            sz.price size_price
+        FROM orders o
+        JOIN metals m 
+            ON m.id = o.metal_id
+        JOIN styles s 
+            ON s.id = o.style_id
+        JOIN sizes sz 
+            ON sz.id = o.size_id
+        """)
+
+        orders = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            order = Order(row['id'], row['metal_id'], row['style_id'], row['size_id'])
+
+            metal = Metal(row['metal_id'], row['metal'], row['metal_price'])
+            
+            order.metal = metal.__dict__
+            
+            style = Style(row['style_id'], row['style'], row['style_price'])
+            
+            order.style = style.__dict__
+            
+            size = Size(row['size_id'], row['carets'], row['size_price'])
+            
+            order.size = size.__dict__
+
+            orders.append(order.__dict__)
+
+    return orders
 
 
 def get_single_order(id):
-    requested_order = None
-    for order in ORDERS:
-        if order["id"] == id:
-            requested_order = order
-    return requested_order
+    """"Returns a single order by provided id
+    """
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
 
-def create_order(order):
-    max_id = ORDERS[-1]["id"]
-    new_id = max_id + 1
-    order["id"] = new_id
-    ORDERS.append(order)
+        db_cursor.execute("""
+        SELECT
+            o.id,
+            o.metal_id,
+            o.style_id,
+            o.size_id
+        FROM orders o
+        WHERE o.id = ?
+        """, ( id, ))
 
-    return order
+        data = db_cursor.fetchone()
 
-def delete_order(id):
-    order_index = -1
-    for index, order in enumerate(ORDERS):
-        if order["id"] == id:
-            order_index = index
+        order = Order(data['id'], data['metal_id'], data['style_id'], data['size_id'])
 
-    if order_index >= 0:
-        ORDERS.pop(order_index)
+        return order.__dict__
+
 
 def update_order(id, new_order):
+    # Iterate the ANIMALS list, but use enumerate() so that
+    # you can access the index value of each item.
     for index, order in enumerate(ORDERS):
         if order["id"] == id:
+            # Found the animal. Update the value.
             ORDERS[index] = new_order
             break
+
+
+def create_order(new_order):
+    """Adds a new order dictionary
+    Args:
+        order (dictionary): Information about the order
+    Returns:
+        dictionary: Returns the order dictionary with an ORDER id
+    """
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        INSERT INTO Orders
+            ( metal_id, style_id, size_id )
+        VALUES
+            ( ?, ?, ?);
+        """, (new_order['metal_id'], new_order['style_id'],
+            new_order['size_id'], ))
+
+        id = db_cursor.lastrowid
+
+        new_order['id'] = id
+
+    return new_order
+
+
+def delete_order(id):
+    """Deletes a single order
+    Args:
+        id (int): Order id
+    """
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        DELETE FROM orders
+        WHERE id = ?
+        """, (id, ))
