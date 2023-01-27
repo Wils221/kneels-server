@@ -74,5 +74,23 @@ JOIN `Metals` m ON m.id = o.metal_id
 JOIN styles s ON s.id = o.style_id
 JOIN sizes sz ON sz.id = o.size_id
 
-
+SELECT
+            o.id,
+            o.metal_id,
+            o.style_id,
+            o.size_id,
+            m.metal,
+            m.price metal_price,
+            s.style,
+            s.price style_price,
+            sz.carets,
+            sz.price size_price
+        FROM orders o
+        JOIN metals m 
+            ON m.id = o.metal_id
+        JOIN styles s 
+            ON s.id = o.style_id
+        JOIN sizes sz 
+            ON sz.id = o.size_id
+        WHERE o.id = 1
 

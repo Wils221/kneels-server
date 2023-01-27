@@ -78,14 +78,40 @@ def get_single_order(id):
             o.id,
             o.metal_id,
             o.style_id,
-            o.size_id
+            o.size_id,
+            m.metal,
+            m.price metal_price,
+            s.style,
+            s.price style_price,
+            sz.carets,
+            sz.price size_price
         FROM orders o
-        WHERE o.id = ?
+        JOIN metals m 
+            ON m.id = o.metal_id
+        JOIN styles s 
+            ON s.id = o.style_id
+        JOIN sizes sz 
+            ON sz.id = o.size_id
+            WHERE o.id = ?
         """, ( id, ))
 
         data = db_cursor.fetchone()
 
         order = Order(data['id'], data['metal_id'], data['style_id'], data['size_id'])
+        
+        metal = Metal(data['metal_id'], data['metal'], data['metal_price'])
+            
+        order.metal = metal.__dict__
+            
+        style = Style(data['style_id'], data['style'], data['style_price'])
+            
+        order.style = style.__dict__
+            
+        size = Size(data['size_id'], data['carets'], data['size_price'])
+            
+        order.size = size.__dict__
+
+
 
         return order.__dict__
 
